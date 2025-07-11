@@ -16,9 +16,12 @@ class HomeScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: const Text('Home')),
       body: Center(
-        child: ElevatedButton(
-          onPressed: () => _logout(context),
-          child: const Text('Logout'),
+        child: SizedBox(
+          width: 200,
+          child: FilledButton(
+            onPressed: () => _logout(context),
+            child: const Text('Logout'),
+          ),
         ),
       ),
     );
