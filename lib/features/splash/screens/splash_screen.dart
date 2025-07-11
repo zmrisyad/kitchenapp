@@ -3,8 +3,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'home.dart';
-import 'login.dart';
+
+import 'package:welcome/features/home/screens/home_screen.dart';
+import 'package:welcome/features/auth/screens/login_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -56,15 +57,16 @@ class _SplashScreenState extends State<SplashScreen>
 
   void _showConnectionError() {
     Fluttertoast.showToast(
-      msg: 'Failed to connect to server, retrying in 10 seconds.',
+      msg: 'Failed to connect to server. Retrying in 10 seconds.',
       gravity: ToastGravity.TOP,
     );
   }
 
+  static const Duration _delay = Duration(milliseconds: 300);
   Future<void> _startSequence() async {
     await _fadeController.forward();
     await _slideInController.forward();
-    await Future.delayed(const Duration(milliseconds: 300));
+    await Future.delayed(_delay);
 
     setState(() => _spinnerWhite = true);
 
@@ -74,7 +76,7 @@ class _SplashScreenState extends State<SplashScreen>
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('token');
 
-    await Future.delayed(const Duration(milliseconds: 300));
+    await Future.delayed(_delay);
     setState(() => _spinnerWhite = false);
 
     await Future.wait([
@@ -84,11 +86,12 @@ class _SplashScreenState extends State<SplashScreen>
 
     if (!mounted) return;
     final routeName = token != null ? '/home' : '/login';
+
     Navigator.of(context).pushReplacement(
       PageRouteBuilder(
         transitionDuration: const Duration(milliseconds: 500),
         pageBuilder: (_, __, ___) =>
-            routeName == '/home' ? HomeScreen() : LoginScreen(),
+            routeName == '/home' ? const HomeScreen() : const LoginScreen(),
         transitionsBuilder: (_, animation, __, child) {
           return FadeTransition(opacity: animation, child: child);
         },
@@ -97,7 +100,11 @@ class _SplashScreenState extends State<SplashScreen>
   }
 
   Future<bool> _attemptConnectionLoop() async {
-    final baseUrl = dotenv.env['API_URL'] ?? '';
+    final baseUrl = dotenv.env['API_URL'];
+    if (baseUrl == null || baseUrl.isEmpty) {
+      Fluttertoast.showToast(msg: 'Missing API_URL in .env file');
+      return false; // skip trying to connect
+    }
     while (mounted) {
       try {
         final response = await http
@@ -118,6 +125,38 @@ class _SplashScreenState extends State<SplashScreen>
     _slideInController.dispose();
     _slideOutController.dispose();
     super.dispose();
+  }
+
+  Widget _buildSplashContent(Color spinnerColor) {
+    return Stack(
+      children: [
+        const Center(
+          child: Text(
+            'WELCOME',
+            style: TextStyle(
+              fontSize: 32,
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+        Positioned(
+          bottom: 48,
+          left: 0,
+          right: 0,
+          child: Center(
+            child: SizedBox(
+              width: 24,
+              height: 24,
+              child: CircularProgressIndicator(
+                strokeWidth: 3,
+                color: spinnerColor,
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
   }
 
   @override
@@ -143,35 +182,7 @@ class _SplashScreenState extends State<SplashScreen>
               child: SlideTransition(position: offset, child: child),
             );
           },
-          child: Stack(
-            children: [
-              Center(
-                child: Text(
-                  'WELCOME',
-                  style: const TextStyle(
-                    fontSize: 32,
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-              Positioned(
-                bottom: 48,
-                left: 0,
-                right: 0,
-                child: Center(
-                  child: SizedBox(
-                    width: 24,
-                    height: 24,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 3,
-                      color: spinnerColor,
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
+          child: _buildSplashContent(spinnerColor),
         ),
       ),
     );
