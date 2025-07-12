@@ -98,14 +98,17 @@ class _LoginScreenState extends State<LoginScreen> {
   );
   Future<void> handleGoogleSignIn() async {
     try {
-      final googleSignIn = Platform.isAndroid
+      final googleSignInInstance = Platform.isAndroid
           ? GoogleSignIn(
               clientId: dotenv.env['GOOGLE_CLIENT_ID'],
               scopes: ['email', 'profile'],
             )
           : GoogleSignIn(scopes: ['email', 'profile']); // iOS auto-reads plist
 
-      final googleUser = await googleSignIn.signIn();
+      await googleSignInInstance
+          .signOut(); // ✅ Reset any previous incomplete login
+
+      final googleUser = await googleSignInInstance.signIn();
       if (googleUser == null) return;
 
       final googleAuth = await googleUser.authentication;
@@ -127,6 +130,9 @@ class _LoginScreenState extends State<LoginScreen> {
         Navigator.pushReplacementNamed(context, '/app');
       }
     } catch (e) {
+      setState(() {
+        _errorMessage = 'Google Sign-In failed: $e';
+      });
       print('❌ Google Sign-In failed: $e');
     }
   }
@@ -170,6 +176,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         ],
                         TextFormField(
                           controller: _emailController,
+                          autofocus: true,
                           keyboardType: TextInputType.emailAddress,
                           style: _fieldTextStyle,
                           decoration: _buildInputDecoration('Email'),
