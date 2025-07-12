@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "310568746138",
+    "project_id": "kitchen-64b4f",
+    "storage_bucket": "kitchen-64b4f.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:310568746138:android:01e4ac606e0ec2e6f07323",
+        "android_client_info": {
+          "package_name": "com.example.welcome"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBCBwe6lYchjBbohxSK22bU-KZPNy7-VhE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

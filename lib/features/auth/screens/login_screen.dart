@@ -2,8 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'dart:io';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:welcome/core/utils/validators.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -85,6 +88,46 @@ class _LoginScreenState extends State<LoginScreen> {
       if (mounted) {
         setState(() => _loading = false);
       }
+    }
+  }
+
+  final GoogleSignIn googleSignIn = GoogleSignIn(
+    clientId:
+        '310568746138-c0kqf9kr1on4hrgrt9g7f111tv1rm6c3.apps.googleusercontent.com',
+    scopes: ['email', 'profile'],
+  );
+  Future<void> handleGoogleSignIn() async {
+    try {
+      final googleSignIn = Platform.isAndroid
+          ? GoogleSignIn(
+              clientId: dotenv.env['GOOGLE_CLIENT_ID'],
+              scopes: ['email', 'profile'],
+            )
+          : GoogleSignIn(scopes: ['email', 'profile']); // iOS auto-reads plist
+
+      final googleUser = await googleSignIn.signIn();
+      if (googleUser == null) return;
+
+      final googleAuth = await googleUser.authentication;
+
+      final credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+
+      final userCredential = await FirebaseAuth.instance.signInWithCredential(
+        credential,
+      );
+      final token = await userCredential.user?.getIdToken();
+
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('token', token ?? '');
+
+      if (context.mounted) {
+        Navigator.pushReplacementNamed(context, '/app');
+      }
+    } catch (e) {
+      print('❌ Google Sign-In failed: $e');
     }
   }
 
@@ -181,6 +224,36 @@ class _LoginScreenState extends State<LoginScreen> {
                                   ),
                                   child: const Text('Login'),
                                 ),
+                        ),
+                        const SizedBox(height: 24),
+                        SizedBox(
+                          width: double.infinity,
+                          height: 48,
+                          child: OutlinedButton.icon(
+                            onPressed: handleGoogleSignIn,
+                            icon: Image.asset(
+                              'assets/icons/google.png',
+                              height: 20,
+                            ),
+                            label: const Text(
+                              'Sign in with Google',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            style: OutlinedButton.styleFrom(
+                              side: const BorderSide(color: Colors.grey),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.all(
+                                  Radius.circular(6),
+                                ),
+                              ),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                              ),
+                            ),
+                          ),
                         ),
                       ],
                     ),
