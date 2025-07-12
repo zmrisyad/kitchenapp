@@ -20,6 +20,7 @@ class _LoginScreenState extends State<LoginScreen> {
   bool _loading = false;
   bool _obscurePassword = true;
   String? _errorMessage;
+  bool _submitted = false;
 
   final _fieldTextStyle = const TextStyle(fontSize: 16);
   final _contentPadding = const EdgeInsets.symmetric(
@@ -36,6 +37,11 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> _login() async {
+    setState(() {
+      _submitted = true;
+      _errorMessage = null;
+    });
+
     if (!_formKey.currentState!.validate()) return;
 
     setState(() {
@@ -107,7 +113,9 @@ class _LoginScreenState extends State<LoginScreen> {
                   const SizedBox(height: 48),
                   Form(
                     key: _formKey,
-                    autovalidateMode: AutovalidateMode.onUserInteraction,
+                    autovalidateMode: _submitted
+                        ? AutovalidateMode.onUserInteraction
+                        : AutovalidateMode.disabled,
                     child: Column(
                       children: [
                         if (_errorMessage != null) ...[
