@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'features/home/screens/home_screen.dart';
-import 'features/account/screens/account_screen.dart';
+import 'features/home/views/home_view.dart';
+import 'features/account/views/account_view.dart';
 
 class AppLayout extends StatefulWidget {
   const AppLayout({super.key});

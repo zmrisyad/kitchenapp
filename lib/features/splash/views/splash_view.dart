@@ -4,8 +4,8 @@ import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
-import 'package:welcome/features/home/screens/home_screen.dart';
-import 'package:welcome/features/auth/screens/login_screen.dart';
+import 'package:welcome/features/home/views/home_view.dart';
+import 'package:welcome/features/auth/views/login_view.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -46,8 +46,7 @@ class _SplashScreenState extends State<SplashScreen>
     end: const Offset(-1.0, 0.0),
   ).animate(CurvedAnimation(parent: _slideOutController, curve: Curves.easeIn));
 
-  final Color _bgColor = const Color(0xFF212121);
-  bool _spinnerWhite = false;
+  bool _spinner = false;
 
   @override
   void initState() {
@@ -68,7 +67,7 @@ class _SplashScreenState extends State<SplashScreen>
     await _slideInController.forward();
     await Future.delayed(_delay);
 
-    setState(() => _spinnerWhite = true);
+    setState(() => _spinner = true);
 
     final success = await _attemptConnectionLoop();
     if (!success) return;
@@ -77,7 +76,7 @@ class _SplashScreenState extends State<SplashScreen>
     final token = prefs.getString('token');
 
     await Future.delayed(_delay);
-    setState(() => _spinnerWhite = false);
+    setState(() => _spinner = false);
 
     await Future.wait([
       _slideOutController.forward(),
@@ -85,7 +84,7 @@ class _SplashScreenState extends State<SplashScreen>
     ]);
 
     if (!mounted) return;
-    final routeName = token != null ? '/home' : '/login';
+    final routeName = (token != null && token.isNotEmpty) ? '/app' : '/login';
 
     Navigator.of(context).pushReplacement(
       PageRouteBuilder(
@@ -135,7 +134,7 @@ class _SplashScreenState extends State<SplashScreen>
             'WELCOME',
             style: TextStyle(
               fontSize: 32,
-              color: Colors.white,
+              color: Color(0xFFFAFAFA),
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -161,10 +160,11 @@ class _SplashScreenState extends State<SplashScreen>
 
   @override
   Widget build(BuildContext context) {
-    final spinnerColor = _spinnerWhite ? Colors.white : _bgColor;
+    final bgColor = const Color(0xFF212121);
+    final spinnerColor = _spinner ? const Color(0xFFFAFAFA) : bgColor;
 
     return Scaffold(
-      backgroundColor: _bgColor,
+      backgroundColor: bgColor,
       body: FadeTransition(
         opacity: _fade,
         child: AnimatedBuilder(

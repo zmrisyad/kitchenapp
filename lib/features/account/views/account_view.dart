@@ -63,9 +63,7 @@ class _AccountScreenState extends State<AccountScreen> {
         title: const Text('Account'),
         centerTitle: false,
         backgroundColor: Theme.of(context).colorScheme.primary,
-        foregroundColor: Theme.of(context).brightness == Brightness.dark
-            ? Colors.black
-            : Colors.white,
+        foregroundColor: Theme.of(context).colorScheme.surface,
         elevation: 2,
         actions: [
           IconButton(

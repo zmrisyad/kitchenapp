@@ -77,9 +77,7 @@ class _HomeScreenState extends State<HomeScreen> {
         title: const Text('Home'),
         centerTitle: true,
         backgroundColor: Theme.of(context).colorScheme.primary,
-        foregroundColor: Theme.of(context).brightness == Brightness.dark
-            ? Colors.black
-            : Colors.white,
+        foregroundColor: Theme.of(context).colorScheme.surface,
         elevation: 2,
       ),
       body: SafeArea(
@@ -87,18 +85,21 @@ class _HomeScreenState extends State<HomeScreen> {
           onRefresh: _loadProfile,
           child: SingleChildScrollView(
             physics: const AlwaysScrollableScrollPhysics(),
-            padding: const EdgeInsets.symmetric(horizontal: 24),
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
             child: Container(
               constraints: const BoxConstraints(maxWidth: 600),
-              height: MediaQuery.of(context).size.height - 120,
-              alignment: Alignment.center,
               child: _loading
                   ? const CircularProgressIndicator()
                   : _error != null
-                  ? Text(_error!, style: const TextStyle(color: Colors.red))
+                  ? Text(
+                      _error!,
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.error,
+                      ),
+                    )
                   : Text(
                       'Hello, $_fullName!',
-                      textAlign: TextAlign.center,
+                      textAlign: TextAlign.start,
                       style: const TextStyle(fontSize: 20),
                     ),
             ),
